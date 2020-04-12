@@ -49,8 +49,10 @@ func main() {
 		log.Fatal(err)
 	}
 	var src []byte
-	src = append([]byte("@startuml\n"), entry...)
+	src = append([]byte("@startuml\n"), []byte(headerTmpl)...)
+	src = append(src, entry...)
 	src = append(src, rel...)
+	src = append(src, []byte(footerTmpl)...)
 	src = append(src, []byte("@enduml\n")...)
 
 	var out io.Writer

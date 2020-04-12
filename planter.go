@@ -37,6 +37,8 @@ type Column struct {
 	DDLType      string
 	NotNull      bool
 	IsPrimaryKey bool
+	HasIndex     bool
+	HasFk        bool
 }
 
 // ForeignKey foreign key
@@ -154,6 +156,8 @@ func LoadColumnDef(db Queryer, schema, table string) ([]*Column, error) {
 			&c.NotNull,
 			&c.IsPrimaryKey,
 			&c.DDLType,
+			&c.HasIndex,
+			&c.HasFk,
 		)
 		c.Comment.String = stripCommentSuffix(c.Comment.String)
 		if err != nil {

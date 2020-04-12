@@ -24,7 +24,9 @@ SELECT
             WHEN 'int2'::regtype THEN 'smallserial'
          END
     ELSE format_type(a.atttypid, a.atttypmod)
-    END AS data_type
+        END AS data_type,
+        indexrelid is not null as has_index,
+        con.confrelid is not null as has_fk
 FROM pg_attribute a
 JOIN ONLY pg_class c ON c.oid = a.attrelid
 JOIN ONLY pg_namespace n ON n.oid = c.relnamespace
@@ -32,6 +34,8 @@ LEFT JOIN pg_constraint ct ON ct.conrelid = c.oid
 AND a.attnum = ANY(ct.conkey) AND ct.contype IN ('p', 'u')
 LEFT JOIN pg_attrdef ad ON ad.adrelid = c.oid AND ad.adnum = a.attnum
 LEFT JOIN pg_description pd ON pd.objoid = a.attrelid AND pd.objsubid = a.attnum
+LEFT JOIN pg_index ix ON c.oid = ix.indrelid AND a.attnum = ANY(ix.indkey)
+LEFT JOIN (select *, unnest(con1.conkey) parent from pg_constraint con1 where con1.contype = 'f') con ON a.attrelid = con.conrelid and a.attnum = con.parent
 WHERE a.attisdropped = false
 AND n.nspname = $1
 AND c.relname = $2
